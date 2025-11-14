@@ -1,0 +1,10 @@
+name = "iframe-app"
+main = "src/index.js"
+compatibility_date = "2024-11-12"
+
+[[kv_namespaces]]
+binding = "xem_report" 
+id = "c5e7575a4f244f9d8fb4a8e09f9ae122"
+preview_id = "6221a009f6294a349917009301975f28"
+[assets]
+directory = "public"
