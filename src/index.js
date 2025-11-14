@@ -240,29 +240,19 @@ app.delete('/api/delete/:id', checkToken, async (c) => {
 });
 
 app.get('/:param/*', async (c) => {
-   const { param } = c.req.param();
-  const db = new KVDatabase(c.env.KV);
-  const post = await db.findPost(param);
-  
-  if (!post) {
-    return c.html(notFoundTemplate());
-  }
-  // Build iframe URL
-  let iframeUrl = post.urliframe;
-  if (post.querystr) {
-    const queryString = c.req.url.split('?');
-    if (queryString) {
-      iframeUrl += (iframeUrl.includes('?') ? '&' : '?') + queryString;
-    }
-  }
-  
-  const html = iframeTemplate(post, iframeUrl);
+  const db = new KVDatabase(c.env[KV_NAME]);
+  const param = c.req.param('param');
+  const url = new URL(c.req.url);
+  const search = url.search;
+  const pathSuffix = c.req.path.substring(param.length + 1);
 
-  return c.html(html, 200, {
-    'Content-Security-Policy': "frame-src *; frame-ancestors *; child-src *;",
-    'X-Frame-Options': 'ALLOWALL',
-    'X-Content-Type-Options': 'nosniff'
-  });
+  const post = await db.findPost(param);
+  if (!post) {
+    return c.html(notFoundTemplate(), 404);
+  }
+
+  const s3 = (search && post.querystr) ? search : '';
+  return c.html(iframeTemplate(post.urliframe, post.name, pathSuffix, s3));
 });
 
 app.get('*', (c) => c.html(notFoundTemplate(), 404));
